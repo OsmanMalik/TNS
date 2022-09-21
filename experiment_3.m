@@ -9,8 +9,8 @@
 vec = @(x) x(:);
 [X, class_array] = data_loader('coil-100');
 
-method = "tns_tr";
-no_trials = 5;
+%method = "cp_als";
+%no_trials = 10;
 ACC = zeros(no_trials, 1);
 ER = zeros(no_trials, 1);
 TIME = zeros(no_trials, 1);
@@ -58,17 +58,17 @@ for tr = 1:no_trials
             factor_mats = cpd(X, CP_rank, options);
             lambda = ones(CP_rank,1);
         case "cp_arls_lev"
-            J = 2e+3*[1 1 1 1];
-            factor_mats = cp_arls_lev(X, CP_rank, J, 'maxiters', maxiters);
+            J = 2000;
+            factor_mats = cp_arls_lev(X, CP_rank, J*ones(1,4), 'maxiters', maxiters);
             lambda = ones(CP_rank,1);
         case "cp_als_es"
-            J1 = [10000 10000 20000 10000];
-            J2 = 1000*[1 1 1 1];        
-            factor_mats = cp_als_es(X, CP_rank, J1, J2, 'maxiters', maxiters, 'permute_for_speed', true);
+            J1 = 10000;
+            J2 = 2000;        
+            factor_mats = cp_als_es(X, CP_rank, J1*ones(1,4), J2*ones(1,4), 'maxiters', maxiters, 'permute_for_speed', true);
             lambda = ones(CP_rank,1);
         case "tns_cp"
-            J = 1000*[1 1 1 1];        
-            factor_mats = TNS_CP(X, CP_rank, J, 'maxiters', maxiters, 'permute_for_speed', true);
+            J = 2000;        
+            factor_mats = TNS_CP(X, CP_rank, J*ones(1,4), 'maxiters', maxiters, 'permute_for_speed', true);
             lambda = ones(CP_rank,1);
         case "tr_als"
             cores = tr_als(X, ranks, 'tol', tol, 'conv_crit', 'relative error', 'maxiters', maxiters, 'verbose', true);
