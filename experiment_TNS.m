@@ -1,16 +1,20 @@
-% Experiment 3
+%experiment_TNS
 %
-% This script is used to run the feature extraction experiment in the
-% paper.
+%This script is used to run the feature extraction experiment in the
+%paper.
 %
-%Note that this function requires some files from the tr-als-sampled
-%repo which is available at: https://github.com/OsmanMalik/tr-als-sampled
+%Note that this function requires some files from the following two repos:
+%   https://github.com/OsmanMalik/tr-als-sampled
+%   https://github.com/OsmanMalik/TD-ALS-ES
+%
+%Please download these repos and add them to the Matlab search path by
+%using the addpath function.
 
 vec = @(x) x(:);
 [X, class_array] = data_loader('coil-100');
 
-%method = "cp_als";
-%no_trials = 10;
+method = "cp_als";
+no_trials = 10;
 ACC = zeros(no_trials, 1);
 ER = zeros(no_trials, 1);
 TIME = zeros(no_trials, 1);
@@ -122,6 +126,3 @@ end
 fprintf('Mean accuracy is %.4f\n', mean(ACC));
 fprintf('Mean error is %.4f\n', mean(ER));
 fprintf('Mean decomposition time was %.4f\n', mean(TIME));
-%{
-%save("experiment_3_" + method + "_results.mat", 'accuracy', 'exp3_toc');
-%}
