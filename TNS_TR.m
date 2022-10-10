@@ -4,64 +4,68 @@ function [cores, varargout] = TNS_TR(X, ranks, embedding_dims, varargin)
 %WARNING: This function is an adaption of the tr_als_sampled.m function in
 %the repo https://github.com/OsmanMalik/tr-als-sampled. I have not tested
 %all the various optional inputs to make sure that they still function as
-%they should with the new sampling procedure used in tr_als_es.m, so
+%they should with the new sampling procedure used in this variation, so
 %proceed with caution.
 %
 %For loading from file: It is assumed that the tensor is stored in a
 %variable Y in the mat file.
 %
-%cores = tr_als_es(X, ranks, embedding_dims) computes a tensor ring (TR) 
+%cores = TNS_TR(X, ranks, embedding_dims) computes a tensor ring (TR) 
 %decomposition of the input N-dimensional array X by sampling the LS
 %problems using sketch sizes for each dimension given in embedding_dims.
 %Ranks is a length-N vector containing the target ranks. The output cores
 %is a cell containing the N cores tensors, each represented as a 3-way
 %array.
 %
-%cores = tr_als_es(___, 'conv_crit', conv_crit) is an optional parameter
+%cores = TNS_TR(___, 'conv_crit', conv_crit) is an optional parameter
 %used to control which convergence criterion is used. Set to either
 %'relative error' or 'norm' to terminate when change in relative error or
 %norm of TR-tensor is below the tolerance in tol. Default is that no
 %convergence criterion is used.
 %
-%cores = tr_als_es(___, 'tol', tol) is an optional argument that controls
+%cores = TNS_TR(___, 'tol', tol) is an optional argument that controls
 %the termination tolerance. If the change in the relative error is less
 %than tol at the conclusion of a main loop iteration, the algorithm
 %terminates. Default is 1e-3.
 %
-%cores = tr_als_es(___, 'maxiters', maxiters) is an optional argument that
+%cores = TNS_TR(___, 'maxiters', maxiters) is an optional argument that
 %controls the maximum number of main loop iterations. The default is 50.
 %
-%cores = tr_als_es(___, 'verbose', verbose) is an optional argument that
+%cores = TNS_TR(___, 'verbose', verbose) is an optional argument that
 %controls the amount of information printed to the terminal during
 %execution. Setting verbose to true will result in more print out. Default
 %is false.
 %
-%cores = tr_als_es(___, 'no_mat_inc', no_mat_inc) is used to control how
+%cores = TNS_TR(___, 'no_mat_inc', no_mat_inc) is used to control how
 %input tensors read from file are sliced up to save RAM. We never use this
 %in our experiments, and I may eventually remove this functionality.
 %
-%cores = tr_als_es(___, 'breakup', breakup) is an optional length-N vector
+%cores = TNS_TR(___, 'breakup', breakup) is an optional length-N vector
 %input that can be used to break up the LS problems with multiple right
 %hand sides that come up into pieces so that not all problems are solved at
 %the same time. This is useful when a tensor dimension is particularly
 %large.
 %
-%cores = tr_als_es(___, 'alpha', alpha) alpha is an optional parameter
+%cores = TNS_TR(___, 'alpha', alpha) alpha is an optional parameter
 %which controls how much Tikhonov regularization is added in LS problems.
 %We found that this helped avoid ill-conditioning on certain datasets.
 %
-%cores = tr_als_es(___, 'permute_for_speed', permute_for_speed)
+%cores = TNS_TR(___, 'permute_for_speed', permute_for_speed)
 %permute_for_speed is an optional parameter which can be set to true in
 %order to permute the tensor modes so that the largest mode is the first
 %one. This can help speed up the sampling process since all the first-mode
 %indices can be drawn at the same time from the same distribution, thus
 %making it beneficial to do this for the mode with the largest dimension.
 %
-%cores = tr_als_es(___, 'init', init) can be used to set how the core
+%cores = TNS_TR(___, 'init', init) can be used to set how the core
 %tensors are initialized. If init is "randn" (the default), then all
 %entries of the cores drawn independently from a standard normal
 %distribution. init can also be a cell array containing initializations for
 %the factor matrices.
+%
+%This is an adaption of the function tr_als_es.m in the repo at
+%https://github.com/OsmanMalik/TD-ALS-ES, which is the repo associated with
+%the paper [Mal22].
 
 %% Handle inputs 
 
@@ -183,7 +187,6 @@ for it = 1:maxiters
         
         % Construct sketch and sample cores
         J2 = embedding_dims(n);
-        %PsiG_2 = recursive_sketch_TR(cores, n, J1);
         [samples, sqrt_p] = draw_samples_TNS_TR(cores, n, J2);
         for m = 1:N
             if m ~= n

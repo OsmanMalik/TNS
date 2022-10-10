@@ -1,21 +1,20 @@
 function A = TNS_CP(X, R, J, varargin)
-%cp_als_es Computes CP decomposition via efficiently sampled ALS
+%TNS_CP Computes CP decomposition via TNS sampling
 %
-%A = cp_als_es(X, R, J1, J2) returns the factor matrices in a cell A for a
-%rank R CP decomposition of X. J1 and J2 are the sketch rates used for
-%leverage score estimation and least squares sampling, respectively. See 
-%our paper for details. 
+%A = TNS_CP(X, R, J) returns the factor matrices in a cell A for a
+%rank R CP decomposition of X. J is the sampling rate used in least squares
+%sampling. See our paper for details. 
 %
-%A = cp_als_es(___, 'maxiters', maxiters) can be used to control the
+%A = TNS_CP(___, 'maxiters', maxiters) can be used to control the
 %maximum number of iterations. maxiters is 50 by default.
 %
-%A = cp_als_es(___, 'permute_for_speed', permute_for_speed) can be used to
+%A = TNS_CP(___, 'permute_for_speed', permute_for_speed) can be used to
 %permute the modes of the input tensor so that the largest mode comes
 %first. This can speed up the sampling, since all 1st indices can be drawn
 %together rather than one at a time. Set permute_for_speed to true to
 %enable this. It is false by default.
 %
-%A = cp_als_es(___, 'A_init', A_init) can be used to set how the factor
+%A = TNS_CP(___, 'A_init', A_init) can be used to set how the factor
 %matrices are initialized. If A_init is "rand", then all the factor
 %matrices are initialized to have entries drawn uniformly at random from
 %[0,1]. If A_init is "RRF", then the factor matrices are initalized via a
@@ -24,6 +23,10 @@ function A = TNS_CP(X, R, J, varargin)
 %
 %This function currently does not support any checking of convergence
 %criteria.
+%
+%This is an adaption of the function cp_als_es.m in the repo at
+%https://github.com/OsmanMalik/TD-ALS-ES, which is the repo associated with
+%the paper [Mal22].
 
 % Handle optional inputs
 params = inputParser;
@@ -102,19 +105,6 @@ for it = 1:maxiters
 
 
         % Construct sketched right hand side
-        % Note: Out of 2 options below, second option is MUCH faster (about
-        % 30-40x in one test).
-
-        % Option 1: Unfold matrix, compute columns to sample, then
-        % transpose
-        %{
-        lin_samples = to_linear_idx_CP(unq_samples, n, sz);
-        Xn = classical_mode_unfolding(X, n);
-        SXnT = Xn(:, lin_samples).';
-        %}
-
-        % Option 2: Compute linear indices, sample directly from tensor,
-        % then reshape to sketched matrix
         szp = cumprod([1 sz(1:end-1)]);
         samples_temp = unq_samples - 1; samples_temp(:,n) = 0;
         llin = 1+samples_temp*szp';

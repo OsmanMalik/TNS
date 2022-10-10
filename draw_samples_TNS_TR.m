@@ -1,8 +1,8 @@
 function [samples, sqrt_probs] = draw_samples_TNS_TR(G, n, J2)
-%draw_samples_TR Draws samples for TR design matrix as discussed in our
+%draw_samples_TNS_TR Draws samples for TR design matrix as discussed in our
 %paper
 %
-%[samples, sqrt_probs] = draw_samples_TR(G, sketch, n, no_samp) returns
+%[samples, sqrt_probs] = draw_samples_TNS_TR(G, sketch, n, no_samp) returns
 %no_samp samples organized into a no_samp by N matrix, where N is the
 %number of modes of the tensor being decomposed, and a vector sqrt_probs
 %which contains the square root of the probability of drawing each of the
@@ -11,12 +11,20 @@ function [samples, sqrt_probs] = draw_samples_TNS_TR(G, n, J2)
 %column of samples will just be NaN, since that index is not being sampled.
 %
 %Note that this function requires some files from the tr-als-sampled
-%repo which is available at: https://github.com/OsmanMalik/tr-als-sampled
+%repo which is available at: https://github.com/OsmanMalik/tr-als-sampled.
+%
+%This is an adaption of the function draw_samples_TR.m in the repo at
+%https://github.com/OsmanMalik/TD-ALS-ES, which is the repo associated with
+%the paper [Mal22].
+%
+%REFERENCES:
+%   [Mal22] O. A. Malik, More Efficient Sampling for Tensor Decomposition
+%   With Worst-Case Guarantees. ICML, 2022. 
 
 N = length(G);
 
-% Precompute the two terms in Eq (38) in paper, but reshaped into tensors
-% according to the discussion in Remark 20 of the paper
+% Precompute the two terms in Eq (38) in paper [Mal22], but reshaped into
+% tensors according to the discussion in Remark 20 of the paper
 C1 = cell(1,N);
 C1_unf = cell(1,N);
 C2 = cell(1,N);

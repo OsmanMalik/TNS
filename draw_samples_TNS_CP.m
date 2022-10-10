@@ -1,15 +1,24 @@
 function [samples, sqrt_probs] = draw_samples_TNS_CP(A, AtA, n, no_samp)
-%draw_samples_CP Draws samples for CP design matrix as discussed in our
+%draw_samples_TNS_CP Draws samples for CP design matrix as discussed in our
 %paper
 %
-%[samples, sqrt_probs] = draw_samples_CP(A, sketch, n, no_samp) returns
+%[samples, sqrt_probs] = draw_samples_TNS_CP(A, sketch, n, no_samp) returns
 %no_samp samples organized into an no_samp by N matrix, where N is the
 %number of modes of the tensor being decomposed, and a vector sqrt_probs
 %which contains the square root of the probability of drawing each of the
 %sampled rows. The cell A should contain all the CP factor matrices in
 %standard order, and the n-th factor matrix is the one being solved for.
 %The n-th column of samples will just be NaN, since that index is not being
-%sampled.
+%sampled. The object AtA should be a cell containing the Gram matrices of
+%the factor matrices ordered in the same way as the cell A.
+%
+%This is an adaption of the function draw_samples_CP.m in the repo at
+%https://github.com/OsmanMalik/TD-ALS-ES, which is the repo associated with
+%the paper [Mal22].
+%
+%REFERENCES:
+%   [Mal22] O. A. Malik, More Efficient Sampling for Tensor Decomposition
+%   With Worst-Case Guarantees. ICML, 2022. 
 
 N = length(A);
 
@@ -29,7 +38,7 @@ for j = 1:N
 end
 Phi = pinv(AmTAm);
 
-% Precompute the two terms in Eq (28) in paper
+% Precompute the two terms in Eq (28) in paper [Mal22].
 M1 = cell(1,N);
 M2 = cell(1,N);
 for j = 1:N
@@ -44,7 +53,6 @@ end
 term_2 = cell(1,N);
 for m = 1:N
     term_2{m} = Phi(:);
-    %term_2{m} = ones(numel(Phi),1);
     for j = m+1:N
         if j ~= n
             term_2{m} = term_2{m} .* M2{j}(:);
